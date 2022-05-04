@@ -14,6 +14,7 @@ phases:
       - IMAGE_TAG=${COMMIT_HASH:=latest}
   build:
     commands:
+      - echo docker build...
       - docker build -t $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest ${REPOSITORY_URI}:${IMAGE_TAG}
   post_build:
@@ -21,6 +22,19 @@ phases:
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - docker push $REPOSITORY_URI:latest
       - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
+      - echo replace placeholder...
+      - cp deployments/taskdef.json taskdef.json
+      - cp deployments/appspec.yaml appspec.yaml
+      - sed -i -e "s#<EXECUTION_ROLE_ARN>#${EXECUTION_ROLE_ARN}#" taskdef.json
+      - sed -i -e "s#<TASK_ROLE_ARN>#${TASK_ROLE_ARN}#" taskdef.json
+      - sed -i -e "s#<LOGGROUP_NAME>#${LOGGROUP_NAME}#" taskdef.json
+      - sed -i -e "s#<TASK_FAMILY>#${TASK_FAMILY}#" taskdef.json
+      - sed -i -e "s#<CONTAINER_NAME>#${CONTAINER_NAME}#" taskdef.json
+      - sed -i -e "s#<CONTAINER_PORT>#${CONTAINER_PORT}#" taskdef.json
+      - sed -i -e "s#<CONTAINER_NAME>#${CONTAINER_NAME}#" appspec.yaml
+      - sed -i -e "s#<CONTAINER_PORT>#${CONTAINER_PORT}#" appspec.yaml
 artifacts:
   files:
     - imageDetail.json
+    - taskdef.json
+    - appspec.yaml
