@@ -17,7 +17,7 @@
       "entryPoint": null,
       "portMappings": [
         {
-          "containerPort": "<CONTAINER_PORT>"
+          "containerPort": <CONTAINER_PORT>
         }
       ],
       "command": null,
