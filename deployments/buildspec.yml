@@ -1,0 +1,40 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      golang: 1.x
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - echo $REPOSITORY_URI
+      - aws --version
+      - aws ecr get-login-password | docker login --username AWS --password-stdin https://${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+  build:
+    commands:
+      - echo docker build...
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest ${REPOSITORY_URI}:${IMAGE_TAG}
+  post_build:
+    commands:
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
+      - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
+      - echo replace placeholder...
+      - cp deployments/taskdef.json taskdef.json
+      - cp deployments/appspec.yaml appspec.yaml
+      - sed -i -e "s#<EXECUTION_ROLE_ARN>#${EXECUTION_ROLE_ARN}#" taskdef.json
+      - sed -i -e "s#<TASK_ROLE_ARN>#${TASK_ROLE_ARN}#" taskdef.json
+      - sed -i -e "s#<LOGGROUP_NAME>#${LOGGROUP_NAME}#" taskdef.json
+      - sed -i -e "s#<TASK_FAMILY>#${TASK_FAMILY}#" taskdef.json
+      - sed -i -e "s#<CONTAINER_NAME>#${CONTAINER_NAME}#" taskdef.json
+      - sed -i -e "s#<CONTAINER_PORT>#${CONTAINER_PORT}#" taskdef.json
+      - sed -i -e "s#<CONTAINER_NAME>#${CONTAINER_NAME}#" appspec.yaml
+      - sed -i -e "s#<CONTAINER_PORT>#${CONTAINER_PORT}#" appspec.yaml
+artifacts:
+  files:
+    - imageDetail.json
+    - taskdef.json
+    - appspec.yaml
