@@ -109,7 +109,7 @@ jobs:
       with:
         tokenPrefix: '${'
         tokenSuffix: '}'
-        files: '["kubernetes/*.yaml"]'
+        files: '["kubernetes/azure/*.yaml"]'
       env:
         CONTAINER_REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
