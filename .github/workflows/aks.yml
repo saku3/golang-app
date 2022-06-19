@@ -9,7 +9,7 @@ on:
 
 env:
   CONTAINER_NAME: go-app
-  DEPLOYMENT_MANIFEST_PATH: kubernetes
+  DEPLOYMENT_MANIFEST_PATH: kubernetes/azure
   IMAGE_PULL_SECRET_NAME: go-k8s-secrets
 
 jobs:
