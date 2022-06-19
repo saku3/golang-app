@@ -9,7 +9,7 @@ on:
 
 env:
   CONTAINER_NAME: go-app
-  DEPLOYMENT_MANIFEST_PATH: kubernetes
+  DEPLOYMENT_MANIFEST_PATH: kubernetes/azure
   IMAGE_PULL_SECRET_NAME: go-k8s-secrets
 
 jobs:
@@ -109,7 +109,7 @@ jobs:
       with:
         tokenPrefix: '${'
         tokenSuffix: '}'
-        files: '["kubernetes/*.yml"]'
+        files: '["kubernetes/azure/*.yaml"]'
       env:
         CONTAINER_REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
         IMAGE_TAG: ${{ env.IMAGE_TAG }}
