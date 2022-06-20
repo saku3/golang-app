@@ -11,6 +11,7 @@ env:
   CONTAINER_NAME: go-app
   DEPLOYMENT_MANIFEST_PATH: kubernetes/azure
   IMAGE_PULL_SECRET_NAME: go-k8s-secrets
+  AKS_KUSTOMIZE_PATH: kubernetes/azure/overlays/dev
 
 jobs:
   buildImage:
@@ -103,24 +104,18 @@ jobs:
         resource-group: ${{ secrets.RESOURCE_GROUP }}
         cluster-name: ${{ secrets.CLUSTER_NAME }}
 
-     # Replace CONTAINER_REGISTRY & IMAGE_TAG  in all the manifest files
-    - name: Replace tokens
-      uses: cschleiden/replace-tokens@v1
-      with:
-        tokenPrefix: '${'
-        tokenSuffix: '}'
-        files: '["kubernetes/azure/*.yaml"]'
-      env:
-        CONTAINER_REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
-        IMAGE_TAG: ${{ env.IMAGE_TAG }}
-
-    # Deploys application based on given manifest file
-    - name: Deploys application
-      uses: Azure/k8s-deploy@v3.1
-      with:
-        action: deploy
-        manifests: ${{ env.DEPLOYMENT_MANIFEST_PATH }}
-        images: |
-          ${{ secrets.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }}
-        imagepullsecrets: |
-          ${{ env.IMAGE_PULL_SECRET_NAME }}
+    # Set up kustomize
+    - name: Set up Kustomize
+      run: |-
+        cd ${{ env.AKS_KUSTOMIZE_PATH }}
+        curl -sfLo kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64
+        chmod u+x ./kustomize
+    # Deploy the Docker image to the AKS cluster
+    - name: Deploy
+      run: |-
+        # replacing the image name in the k8s template
+        cd ${{ env.AKS_KUSTOMIZE_PATH }}
+        ./kustomize edit set image CONTAINER_REGISTRY.azurecr.io/go-app:IMAGE_TAG=${{ secrets.AZURE_CONTAINER_REGISTRY }}.azurecr.io/go-app:${{ github.sha }}
+        ./kustomize build . | kubectl apply -f -
+        kubectl rollout status deployment/$DEPLOYMENT_NAME
+        kubectl get services -o wide
