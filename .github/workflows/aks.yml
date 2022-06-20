@@ -12,6 +12,7 @@ env:
   DEPLOYMENT_MANIFEST_PATH: kubernetes/azure
   IMAGE_PULL_SECRET_NAME: go-k8s-secrets
   AKS_KUSTOMIZE_PATH: kubernetes/azure/overlays/dev
+  DEPLOYMENT_NAME: dev-go-deployment
 
 jobs:
   buildImage:
