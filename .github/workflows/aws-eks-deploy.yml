@@ -37,7 +37,7 @@ jobs:
       - name: Update kubeconfig
         run: |-
           aws --region $REGION eks update-kubeconfig --name $CLUSTER_NAME --kubeconfig ./kubeconfig
-          export KUBECONFIG=$PWD/kubeconfig
+          cp kubeconfig ${{ env.EKS_KUSTOMIZE_PATH }}
       # Set up kustomize
       - name: Set up Kustomize
         run: |-
@@ -50,6 +50,6 @@ jobs:
           # replacing the image name in the k8s template
           cd ${{ env.EKS_KUSTOMIZE_PATH }}
           ./kustomize edit set image ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/REPOSITORY:TAG=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPOSITORY:$GITHUB_SHA
-          ./kustomize build . | kubectl apply -f -
-          kubectl rollout status deployment/$DEPLOYMENT_NAME
-          kubectl get services -o wide
+          ./kustomize build . | kubectl --kubeconfig=./kubeconfig apply -f -
+          kubectl --kubeconfig=./kubeconfig rollout status deployment/$DEPLOYMENT_NAME
+          kubectl --kubeconfig=./kubeconfig get services -o wide
