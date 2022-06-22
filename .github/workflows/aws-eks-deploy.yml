@@ -35,7 +35,9 @@ jobs:
     
       # Update kubeconfig
       - name: Update kubeconfig
-        run: aws --region $REGION eks update-kubeconfig --name $CLUSTER_NAME --kubeconfig ./kubeconfig
+        run: |-
+          aws --region $REGION eks update-kubeconfig --name $CLUSTER_NAME --kubeconfig ./kubeconfig
+          export KUBECONFIG=$PWD/kubeconfig
       # Set up kustomize
       - name: Set up Kustomize
         run: |-
