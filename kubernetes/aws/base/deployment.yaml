@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: go-container
-          image: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/REPOSITORY/IMAGE:TAG
+          image: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/REPOSITORY:TAG
           ports:
           - containerPort: 8080 
