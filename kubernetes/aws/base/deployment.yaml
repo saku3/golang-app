@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: go-container
-          image: ${CONTAINER_REGISTRY}.azurecr.io/go-app:${IMAGE_TAG}
+          image: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/REPOSITORY:TAG
           ports:
           - containerPort: 8080 
