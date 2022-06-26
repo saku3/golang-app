@@ -8,6 +8,7 @@ import (
 
 func main() {
 	r := gin.Default()
+	r.GET("/healthcheck", controller.HealthCheck)
 	r.GET("/hello", controller.Hello)
 	r.Run(":8080")
 }
